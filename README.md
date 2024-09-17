@@ -14,7 +14,7 @@ Step-by-Step Setup Instructions
 First, you'll need to clone the repository from GitHub:
 
 bash
-Copy code
+
 git clone https://github.com/4lp1ne/Byte_2_Clean.git
 cd Byte_2_Clean
 2. Set Up a Virtual Environment (Optional but Recommended)
@@ -23,52 +23,55 @@ To avoid dependency conflicts, it is recommended to set up a Python virtual envi
 For Linux/Mac:
 
 bash
-Copy code
+
 python3 -m venv env
 source env/bin/activate
 For Windows:
 
 bash
-Copy code
+
 python -m venv env
 env\Scripts\activate
 3. Install Dependencies
 In the project directory, run the following command to install the required packages:
 
 bash
-Copy code
-pip install -r requirements.txt
-requirements.txt:
-Here’s the content of the requirements.txt file:
 
-Copy code
-tqdm
+pip install -r requirements.txt
+
 This file only contains the tqdm library, as the rest of the required libraries (os, hashlib, and json) are part of Python’s standard library and do not need to be installed separately.
 
 Running the Script
+
 Once the dependencies are installed, you can run the script. The script will prompt you to enter the path to your external drive or directory for scanning.
 
 bash
-Copy code
+
 python byte_2_clean.py
+
 Usage:
+
 Scanning for Duplicates:
 The script will scan the provided directory for duplicate files. It calculates the hash (using MD5) of each file and looks for duplicates.
 
 Saving Progress:
+
 If the process is interrupted (e.g., disk unplugged or system shutdown), the progress will be saved automatically in progress.json. The next time the script runs, it will pick up where it left off.
 
 Manual Deletion:
+
 Once the duplicates are found, the script will display them and ask if you want to delete them. You can decide whether to keep one file and delete the rest.
 
 Restoring Progress:
+
 When the process resumes, it will load progress from the progress.json file and skip over files that have already been processed.
 
 Commands Summary
+
 Clone the repository:
 
 bash
-Copy code
+
 git clone https://github.com/4lp1ne/Byte_2_Clean.git
 cd Byte_2_Clean
 Create a virtual environment (optional but recommended):
@@ -76,30 +79,32 @@ Create a virtual environment (optional but recommended):
 For Linux/Mac:
 
 bash
-Copy code
+
 python3 -m venv env
 source env/bin/activate
 For Windows:
 
 bash
-Copy code
+
 python -m venv env
 env\Scripts\activate
+
 Install dependencies:
 
 bash
-Copy code
+
 pip install -r requirements.txt
+
 Run the script:
 
 bash
-Copy code
+
 python byte_2_clean.py
 
 
 Example Project Structure
 bash
-Copy code
+
 Byte_2_Clean/
 
 │
@@ -114,12 +119,16 @@ Byte_2_Clean/
 
 
 Possible Future Enhancements
+
 Multi-threading support:
+
 Add multi-threading to speed up the scanning process in large directories.
 
 Additional hashing algorithms:
+
 Support additional hashing algorithms like SHA-256 or SHA-1 for more security-conscious environments.
 
 Enhanced output details:
+
 Provide more detailed output with file sizes, timestamps, and optional file previews before deletion.
 
