@@ -1,5 +1,7 @@
 Byte_2_Clean
-Byte_2_Clean is a Python-based tool designed to help you find and delete duplicate files from an external drive or a specific directory on your system. It calculates hashes for files, identifies duplicates, and allows you to automatically or manually remove redundant files while keeping one original. Additionally, it supports automatic progress saving and restoring if the process is interrupted.
+
+
+is a Python-based tool designed to help you find and delete duplicate files from an external drive or a specific directory on your system. It calculates hashes for files, identifies duplicates, and allows you to automatically or manually remove redundant files while keeping one original. Additionally, it supports automatic progress saving and restoring if the process is interrupted.
 
 Features:
 Hash-based Duplicate Detection: Scans files using MD5 hashes to detect duplicates.
