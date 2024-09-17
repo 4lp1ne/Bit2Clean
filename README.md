@@ -1,7 +1,3 @@
-Here is a **raw version** of the GitHub description for your project that you can copy-paste without the "copy code" button:
-
----
-
 # Byte_2_Clean
 
 **Byte_2_Clean** is a Python-based tool designed to help you efficiently find and delete duplicate files from an external drive or a specified directory. It provides both secure and fast options for hashing, while saving and restoring progress in case the process is interrupted.
