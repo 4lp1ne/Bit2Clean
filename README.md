@@ -7,6 +7,8 @@ Hash-based Duplicate Detection: Scans files using MD5 hashes to detect duplicate
 Progress Save/Restore: Automatically saves progress to a progress.json file and resumes the scan if interrupted.
 Manual/Automatic Deletion: Allows you to manually confirm before deleting duplicates or automatically delete them.
 Progress Bar: Uses tqdm to provide real-time progress feedback.
+
+
 Step-by-Step Setup Instructions
 1. Clone the Repository
 First, you'll need to clone the repository from GitHub:
