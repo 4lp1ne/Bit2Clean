@@ -11,14 +11,23 @@ PROGRESS_FILE = 'progress.json'
 # Load or initialize progress
 def load_progress():
     if os.path.exists(PROGRESS_FILE):
-        with open(PROGRESS_FILE, 'r') as f:
-            return json.load(f)
+        try:
+            with open(PROGRESS_FILE, 'r') as f:
+                return json.load(f)
+        except json.JSONDecodeError as e:
+            print(f"Error reading {PROGRESS_FILE}: {e}. File might be corrupted.")
+            return {}
     return {}
+
 
 # Save progress to file
 def save_progress(progress):
-    with open(PROGRESS_FILE, 'w') as f:
-        json.dump(progress, f)
+    try:
+        with open(PROGRESS_FILE, 'w') as f:
+            json.dump(progress, f)
+    except IOError as e:
+        print(f"Error saving progress to {PROGRESS_FILE}: {e}")
+
 
 # Function to hash files securely or insecurely based on user's choice
 def hash_file(file_path, secure):
