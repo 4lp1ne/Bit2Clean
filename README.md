@@ -99,10 +99,15 @@ Example Project Structure
 bash
 Copy code
 Byte_2_Clean/
+
 │
+
 ├── byte_2_clean.py      # The main Python script
+
 ├── progress.json        # Progress save file (generated at runtime)
+
 ├── README.md            # Project documentation
+
 └── requirements.txt     # Dependency list (contains tqdm)
 
 
