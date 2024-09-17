@@ -93,6 +93,8 @@ Run the script:
 bash
 Copy code
 python byte_2_clean.py
+
+
 Example Project Structure
 bash
 Copy code
@@ -102,6 +104,8 @@ Byte_2_Clean/
 ├── progress.json        # Progress save file (generated at runtime)
 ├── README.md            # Project documentation
 └── requirements.txt     # Dependency list (contains tqdm)
+
+
 Possible Future Enhancements
 Multi-threading support:
 Add multi-threading to speed up the scanning process in large directories.
