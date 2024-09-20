@@ -4,7 +4,7 @@ import xxhash
 import json
 import threading
 import tkinter as tk
-from tkinter import ttk, scrolledtext
+from tkinter import ttk, scrolledtext, messagebox
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -122,8 +122,7 @@ def scan_for_duplicates(directory, mode='secure'):
 
 
 # Ask user for confirmation to delete all duplicates
-def delete_duplicates():
-    duplicates = scan_for_duplicates(path_entry.get(), hash_option.get())
+def delete_duplicates(duplicates):
     if not duplicates:
         append_log("No duplicates found.")
         return
@@ -153,10 +152,18 @@ def run_scan():
     append_log(f"Scanning directory '{directory}' with {mode} mode...")
 
     # Start the scan
-    scan_for_duplicates(directory, mode)
+    duplicates = scan_for_duplicates(directory, mode)
 
     # Re-enable the button after scan completion
     start_button.config(state=tk.NORMAL)
+
+    # If duplicates are found, ask for confirmation before deleting
+    if duplicates:
+        confirm_delete = messagebox.askyesno("Delete Duplicates", f"{len(duplicates)} duplicates found. Do you want to delete them?")
+        if confirm_delete:
+            delete_duplicates(duplicates)
+        else:
+            append_log("Duplicate files retained.")
 
 
 # Start scanning process
@@ -188,9 +195,5 @@ log_area.pack(pady=5)
 # Start Button
 start_button = tk.Button(root, text="Start Scan", command=start_scan)
 start_button.pack(pady=5)
-
-# Delete Duplicates Button
-delete_button = tk.Button(root, text="Delete Duplicates", command=delete_duplicates)
-delete_button.pack(pady=10)
 
 root.mainloop()
