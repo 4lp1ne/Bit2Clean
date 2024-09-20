@@ -1,6 +1,3 @@
-Certainly! Below is a `README.md` file formatted for your GitHub project. It includes detailed instructions for setup, installation, running the application, and troubleshooting.
-
----
 
 # Byte_2_Clean
 
