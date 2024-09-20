@@ -1,64 +1,80 @@
-# Byte_2_Clean
+Byte_2_Clean
+Overview
+Byte_2_Clean is a Python application designed to scan directories for duplicate files using various hashing techniques. The application features a graphical user interface (GUI) built with tkinter and supports multiple hashing algorithms to identify duplicates.
 
-**Byte_2_Clean** is a Python-based tool designed to help you efficiently find and delete duplicate files from an external drive or a specified directory. It provides both secure and fast options for hashing, while saving and restoring progress in case the process is interrupted.
+Features
+GUI Interface: User-friendly graphical interface for specifying the directory and choosing the hashing technique.
+Hashing Techniques: Supports SHA-256 (secure), xxhash.xxh64 (fast), and xxhash.xxh32 (very fast).
+Progress Tracking: Saves and loads scan progress for efficient processing.
+Detailed Logging: Displays logs and scan results in the GUI.
+Installation
+Prerequisites
+Python 3.6 or higher
+Install Required Packages
+To install the required Python packages, run the following command:
 
-## Features:
-- **Hash-based Duplicate Detection**: Detects duplicate files using either SHA-256 (secure) or XXHash (fast).
-- **Progress Save/Restore**: Automatically saves progress in a `progress.json` file and resumes scanning from the last completed file if interrupted.
-- **Multi-threading Support**: Scans multiple files in parallel for improved performance.
-- **Manual/Automatic Deletion**: Option to either confirm deletions manually or automatically delete duplicates.
-- **Real-time Progress Feedback**: Provides progress updates via a `tqdm` progress bar.
+sh
+Copy code
+pip install xxhash
+Setup
+Clone the Repository
 
-## Setup Instructions:
+Clone the repository to your local machine:
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/4lp1ne/Byte_2_Clean.git
-   cd Byte_2_Clean
-   ```
+sh
+Copy code
+git clone https://github.com/4lp1ne/Byte_2_Clean.git
+Navigate to the Project Directory
 
-2. **Set up a virtual environment (optional but recommended)**:
-   - **For Linux/Mac**:
-     ```bash
-     python3 -m venv env
-     source env/bin/activate
-     ```
-   - **For Windows**:
-     ```bash
-     python -m venv env
-     .\env\Scripts\activate
-     ```
+Change to the project directory:
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+sh
+Copy code
+cd Byte_2_Clean
+Usage
+Run the Application
 
-## Usage:
+Execute the Python script to start the GUI application:
 
-Run the script to start scanning for duplicates:
+sh
+Copy code
+python duplicate_file_scanner.py
+Using the GUI
 
-```bash
-python byte_2_clean.py
-```
+Directory Path: Enter the directory path you want to scan in the input field.
+Select Hashing Technique: Choose from the dropdown menu:
+"secure" for SHA-256 (more secure but slower)
+"fast" for xxhash.xxh64 (faster but less secure)
+"very_fast" for xxhash.xxh32 (fastest but least secure)
+Start Scan: Click the "Start Scan" button to begin scanning.
+Delete Duplicates: After scanning, click the "Delete Duplicates" button to remove all detected duplicates.
+The log output area will show detailed information about the scanning and deletion processes.
 
-- **Step 1**: The script will prompt you to enter the directory path to scan for duplicates.
-- **Step 2**: Select the hashing strategy:
-  - `1` for **secure** (SHA-256)
-  - `2` for **fast** (XXHash)
-- **Step 3**: After scanning, you can choose to manually confirm deletions or automatically delete all duplicates.
+Code Description
+Main Functions
+save_progress(progress): Saves the current scan progress to a JSON file.
+load_progress(): Loads scan progress from the JSON file.
+compute_hash(file_path, hash_func_cls): Computes the hash of a file using the specified hashing function.
+scan_for_duplicates(directory, mode='secure'): Scans the specified directory for duplicate files using the selected hashing mode.
+delete_duplicates(): Deletes all duplicate files found during the scan.
+append_log(message): Appends messages to the log output area in the GUI.
+run_scan(): Runs the scan process in a separate thread to keep the GUI responsive.
+start_scan(): Starts the scan process in a new thread.
+GUI Setup
+Directory Path Input: Entry box for specifying the directory path.
+Hashing Technique Selector: Dropdown menu to select the hashing technique.
+Log Output: Scrolled text area to display log messages.
+Start Scan Button: Button to initiate the scanning process.
+Delete Duplicates Button: Button to delete all found duplicate files.
+Troubleshooting
+GUI Freezes: The scanning process runs in a separate thread to keep the GUI responsive. If the GUI freezes, ensure that no other processes are running that may interfere with file I/O operations.
+Errors Reading Files: Check file permissions and ensure the specified directory path is correct.
+License
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Example Project Structure:
-```
-Byte_2_Clean/
-│
-├── byte_2_clean.py        # Main script
-├── progress.json          # Generated file for saving progress
-├── README.md              # Documentation
-└── requirements.txt       # Dependencies (tqdm, xxhash)
-```
+Contributing
+Contributions are welcome! Please submit issues or pull requests to improve the application.
 
-## Future Enhancements:
-- Add multi-threading improvements for larger directories.
-- Support for more hashing algorithms (e.g., SHA-256, xxhash64).
-- More detailed duplicate reporting with file metadata.
+Contact
+For questions or support, please open an issue in the GitHub repository.
+
