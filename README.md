@@ -1,12 +1,11 @@
-Here’s the complete setup for your project, including the license, installation instructions, and required packages:
-
----
-
 # Byte_2_Clean
 
 ### Overview
 `Byte_2_Clean` is a Python application designed to scan directories for duplicate files using various hashing techniques. The application features a graphical user interface (GUI) built with `tkinter` and supports multiple hashing algorithms to identify and remove duplicates.
+---
+![Screenshot 2024-10-07 043711](https://github.com/user-attachments/assets/cfbac94a-a1f7-420d-a06f-458547a758f5)
 
+---
 ### Features
 - **GUI Interface**: User-friendly graphical interface for specifying directories and selecting hashing techniques.
 - **Hashing Techniques**: Supports multiple hashing algorithms for scanning:
