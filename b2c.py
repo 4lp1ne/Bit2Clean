@@ -5,13 +5,17 @@ import json
 import threading
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox, filedialog
-from concurrent.futures import ThreadPoolExecutor
-import subprocess  # To open files with the default system application
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import subprocess
+
+# Global event to control the scanning process
+stop_event = threading.Event()
 
 # Append log to the text widget in the GUI
 def append_log(message):
-    log_area.insert(tk.END, message + '\n')
-    log_area.yview(tk.END)
+    if not stop_event.is_set():  # Only log if the scan is running
+        log_area.insert(tk.END, message + '\n')
+        log_area.yview(tk.END)
 
 # Save progress to a JSON file
 def save_progress(progress):
@@ -49,6 +53,9 @@ def compute_hash(file_path, hash_func_cls):
         hash_func = hash_func_cls()
         with open(file_path, 'rb') as f:
             while chunk := f.read(8192):  # Read in larger chunks
+                if stop_event.is_set():  # Check stop event during hash computation
+                    append_log("Scan stopped during file hashing.")
+                    return None
                 hash_func.update(chunk)
         hash_value = hash_func.hexdigest()
         append_log(f"Hash computed for {file_path}: {hash_value}")
@@ -59,9 +66,10 @@ def compute_hash(file_path, hash_func_cls):
 
 # Function to update progress bar and status label
 def update_progress(current, total):
-    progress = (current / total) * 100
-    progress_var.set(progress)
-    status_label.config(text=f"Scanning... {int(progress)}% complete")
+    if not stop_event.is_set():
+        progress = (current / total) * 100
+        progress_var.set(progress)
+        status_label.config(text=f"Scanning... {int(progress)}% complete")
 
 # Function to display unique files based on button click (either original or duplicate)
 def display_files(files, title="Files"):
@@ -90,7 +98,6 @@ def open_folder_containing_file(listbox):
 # Scan directory for duplicates in various modes
 def scan_for_duplicates(directory, mode='Quick Scan'):
     processed_files = {}
-    duplicate_files = {}
     file_hash_map = {}  # Mapping of file hash -> list of file paths
 
     append_log(f"Starting scan in '{mode}' mode...")
@@ -113,6 +120,9 @@ def scan_for_duplicates(directory, mode='Quick Scan'):
         file_paths = []
         append_log("Collecting file paths...")
         for root, _, files in os.walk(directory):
+            if stop_event.is_set():  # Check stop event during file collection
+                append_log("Scan stopped during file collection.")
+                return file_hash_map
             for file in files:
                 file_path = os.path.join(root, file)
                 file_paths.append(file_path)
@@ -121,12 +131,17 @@ def scan_for_duplicates(directory, mode='Quick Scan'):
 
         # Process files in parallel to compute hashes
         with ThreadPoolExecutor() as executor:
-            futures = [executor.submit(compute_hash, file_path, hash_func_cls) for file_path in file_paths]
+            futures = {executor.submit(compute_hash, file_path, hash_func_cls): file_path for file_path in file_paths}
 
-            for i, (file_path, future) in enumerate(zip(file_paths, futures)):
+            for i, future in enumerate(as_completed(futures)):
+                if stop_event.is_set():  # Check stop event during hash computation
+                    append_log("Scan stopped by user.")
+                    return file_hash_map
+
+                file_path = futures[future]
                 file_hash = future.result()
                 if file_hash is None:
-                    append_log(f"Skipping file {file_path} due to read error.")
+                    append_log(f"Skipping file {file_path} due to error or stop.")
                     continue
 
                 # Store the file path by hash in file_hash_map
@@ -142,7 +157,6 @@ def scan_for_duplicates(directory, mode='Quick Scan'):
         })
 
     except KeyboardInterrupt:
-        # Handle interruptions gracefully
         append_log("\nScan interrupted. Saving progress...")
         save_progress({
             'processed_files': [{'path': path, 'hash': hash} for path, hash in processed_files.items()],
@@ -223,13 +237,27 @@ def display_duplicates_for_selected_original():
             display_files(duplicates, title="Duplicate Files")
             break
 
+# Function to display original files again after viewing duplicates
+def display_original_files():
+    original_files = [file_paths[0] for file_paths in file_hash_map.values() if len(file_paths) > 1]
+    display_files(original_files, title="Original Files")
+
+# Function to start or stop scanning
+def toggle_scan():
+    if start_button["text"] == "Start Scan":
+        stop_event.clear()
+        start_button.config(text="Stop Scan")
+        threading.Thread(target=run_scan, daemon=True).start()
+    else:
+        stop_event.set()  # Signal to stop the scan
+        start_button.config(text="Start Scan")
+
 # Function to run the scan in a separate thread
 def run_scan():
     # Clear the log area and listbox before starting a new scan
     log_area.delete(1.0, tk.END)  # Clear the log area
     file_listbox.delete(0, tk.END)  # Clear the file listbox
-    
-    start_button.config(state=tk.DISABLED)
+
     directory = path_entry.get()
     mode = hash_option.get()
 
@@ -239,27 +267,23 @@ def run_scan():
     global file_hash_map
     file_hash_map = scan_for_duplicates(directory, mode)
 
-    start_button.config(state=tk.NORMAL)
-    
-    if file_hash_map:
+    start_button.config(text="Start Scan")  # Reset the button text when scan is complete or stopped
+
+    if file_hash_map and not stop_event.is_set():
         # Show only the original files (first occurrence of each file)
         original_files = [file_paths[0] for file_paths in file_hash_map.values() if len(file_paths) > 1]
         total_size = calculate_total_size(original_files)
         append_log(f"Total original files: {len(original_files)}, Total size: {total_size:.2f} MB")
         display_files(original_files, title="Original Files")
-        messagebox.showinfo("Scan Complete", f"Found {len(original_files)} original files totaling {total_size:.2f} MB.")
-    else:
-        append_log("No duplicates found.")
-        messagebox.showinfo("Scan Complete", "No duplicate files found.")
-
-# ** Start scanning process - this must be defined before we use it! **
-def start_scan():
-    threading.Thread(target=run_scan, daemon=True).start()
+        messagebox.showinfo("Scan Complete",
+                            f"Found {len(original_files)} original files totaling {total_size:.2f} MB.")
+    elif stop_event.is_set():
+        append_log("Scan stopped.")
 
 # Main GUI setup
 root = tk.Tk()
 root.title("4lp1ne > Duplicate File Scanner < ɘn1ql4")
-root.geometry("420x490")  # Scale down the size to 70%
+root.geometry("400x470")  # Reduced window size by 5%
 
 # Directory Path and Choose Button
 tk.Label(root, text="Directory Path:").pack(pady=5)
@@ -292,7 +316,7 @@ status_label.pack(pady=5, fill='x')
 
 # Listbox to display files (either original or duplicate)
 tk.Label(root, text="Files:").pack(pady=5)
-file_listbox = tk.Listbox(root, selectmode=tk.SINGLE, width=60, height=6)
+file_listbox = tk.Listbox(root, selectmode=tk.EXTENDED, width=60, height=6)
 file_listbox.pack(pady=5)
 
 # Label to update based on whether we display original or duplicate files
@@ -304,23 +328,28 @@ button_frame = tk.Frame(root)
 button_frame.pack(pady=10)
 
 # Buttons to display original or duplicate files
-original_button = tk.Button(button_frame, text="Display Duplicates of Selected Original", command=display_duplicates_for_selected_original)
+original_button = tk.Button(button_frame, text="Display Duplicates of Selected Original",
+                            command=display_duplicates_for_selected_original)
 original_button.grid(row=0, column=0, padx=5, pady=5)
 
+duplicate_button = tk.Button(button_frame, text="Display Original Files", command=display_original_files)
+duplicate_button.grid(row=0, column=1, padx=5, pady=5)
+
 # Open Folder Button
-open_button = tk.Button(button_frame, text="Open Containing Folder", command=lambda: open_folder_containing_file(file_listbox))
-open_button.grid(row=0, column=1, padx=5, pady=5)
+open_button = tk.Button(button_frame, text="Open Containing Folder",
+                        command=lambda: open_folder_containing_file(file_listbox))
+open_button.grid(row=1, column=0, padx=5, pady=5)
 
 # Delete Selected Button
 delete_selected_button = tk.Button(button_frame, text="Delete Selected Duplicates", command=delete_selected_duplicates)
-delete_selected_button.grid(row=1, column=0, padx=5, pady=5)
+delete_selected_button.grid(row=1, column=1, padx=5, pady=5)
 
 # Delete All Button
 delete_all_button = tk.Button(button_frame, text="Delete All Duplicates", command=delete_all_duplicates)
-delete_all_button.grid(row=1, column=1, padx=5, pady=5)
+delete_all_button.grid(row=2, column=0, padx=5, pady=5)
 
-# Start Button
-start_button = tk.Button(root, text="Start Scan", command=start_scan)
+# Start/Stop Button
+start_button = tk.Button(root, text="Start Scan", command=toggle_scan)
 start_button.pack(pady=5)
 
 # Reset Button
